@@ -17,15 +17,27 @@ const server = http.createServer(app);
 // WebSocket 서버
 const wss = new WebSocket.Server({ server });
 
+const sockets = [];
+
 wss.on("connection", (socket) => {
+  sockets.push(socket);
+  // socket 안에 아래와 같이 정보를 저장할 수 있다.
+  socket["nickName"] = "unKnown";
   console.log("Connected to Browser 👍");
   socket.on("close", () => {
     console.log("Disconected from Browser 👎");
   });
-  socket.on("message", (message) => {
-    console.log(message.toString());
+  socket.on("message", (msg) => {
+    const message = JSON.parse(msg);
+    switch (message.type) {
+      case "new_message":
+        sockets.forEach((aSocket) => {
+          aSocket.send(`${socket.nickName}: ${message.payload}`);
+        });
+      case "nickName":
+        socket["nickName"] = message.payload;
+    }
   });
-  socket.send("hello!!");
 });
 
 server.listen(3000, handleListen);
