@@ -1,40 +1,21 @@
-const messageList = document.querySelector("ul");
-const nickNameForm = document.querySelector("#nickName");
-const messageForm = document.querySelector("#message");
-const socket = new WebSocket(`ws://${window.location.host}`);
+// io function은 알아서 socket.io를 실행하고 있는 서버를 찾는다.
+const socket = io();
 
-const makeMessage = (type, payload) => {
-  const msg = { type, payload };
-  return JSON.stringify(msg);
+const welcome = document.getElementById("welcome");
+const form = welcome.querySelector("form");
+
+const backendDone = (msg) => {
+  console.log(`backend says: ${msg}`);
 };
 
-socket.addEventListener("open", () => {
-  console.log("Connected to Server 👍");
-});
-
-socket.addEventListener("message", (message) => {
-  const li = document.createElement("li");
-  li.innerText = message.data;
-  messageList.append(li);
-});
-
-socket.addEventListener("close", () => {
-  console.log("Disconected from Server 👎");
-});
-
-const handleSubmit = (event) => {
+const handleRoomSubmit = (event) => {
   event.preventDefault();
-  const input = messageForm.querySelector("input");
-  socket.send(makeMessage("new_message", input.value));
+  const input = form.querySelector("input");
+  // 특정한 event를 emit해 줄 수 있다. 또한 object를 전송할 수 있다.
+  // 마지막 인자는 함수를 frontend에 존재하는 function을 실행한다. backend에서 실행은 하지만 구현은 frontend에서 구현한다.
+  // 함수는 무조건 마지막 인자여야 한다.
+  socket.emit("enter_room", { payload: input.value }, backendDone);
   input.value = "";
 };
 
-const handleNickNameSubmit = (event) => {
-  event.preventDefault();
-  const input = nickNameForm.querySelector("input");
-  socket.send(makeMessage("nickName", input.value));
-  input.value = "";
-};
-
-messageForm.addEventListener("submit", handleSubmit);
-nickNameForm.addEventListener("submit", handleNickNameSubmit);
+form.addEventListener("submit", handleRoomSubmit);
