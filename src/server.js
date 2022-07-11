@@ -20,9 +20,20 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
+  // socket.onAny((event) => {
+  //   console.log(`Socket Event: ${event}`);
+  // });
   socket.on("enter_room", (roomName, done) => {
-    socket.join();
+    socket.join(roomName);
     done();
+    socket.to(roomName).emit("welcome");
+  });
+  socket.on("new_message", (msg, roomName, done) => {
+    socket.to(roomName).emit("new_message", msg);
+    done();
+  });
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) => socket.to(room).emit("bye"));
   });
 });
 
