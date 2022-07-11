@@ -21,10 +21,8 @@ const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
   socket.on("enter_room", (roomName, done) => {
-    console.log(roomName);
-    setTimeout(() => {
-      done("hello from the backend");
-    }, 5000);
+    socket.join();
+    done();
   });
 });
 

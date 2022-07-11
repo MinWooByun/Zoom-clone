@@ -3,9 +3,17 @@ const socket = io();
 
 const welcome = document.getElementById("welcome");
 const form = welcome.querySelector("form");
+const room = document.getElementById("room");
 
-const backendDone = (msg) => {
-  console.log(`backend says: ${msg}`);
+room.hidden = true;
+
+let roomName;
+
+const showRoom = () => {
+  welcome.hidden = true;
+  room.hidden = false;
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName}`;
 };
 
 const handleRoomSubmit = (event) => {
@@ -14,7 +22,8 @@ const handleRoomSubmit = (event) => {
   // 특정한 event를 emit해 줄 수 있다. 또한 object를 전송할 수 있다.
   // 마지막 인자는 함수를 frontend에 존재하는 function을 실행한다. backend에서 실행은 하지만 구현은 frontend에서 구현한다.
   // 함수는 무조건 마지막 인자여야 한다.
-  socket.emit("enter_room", { payload: input.value }, backendDone);
+  socket.emit("enter_room", { payload: input.value }, showRoom);
+  roomName = input.value;
   input.value = "";
 };
 
