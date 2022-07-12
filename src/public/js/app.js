@@ -33,6 +33,11 @@ const handleNickNameSubmit = (event) => {
   input.value = "";
 };
 
+const userCount = (newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
+};
+
 const showRoom = () => {
   welcome.hidden = true;
   room.hidden = false;
@@ -57,12 +62,14 @@ const handleRoomSubmit = (event) => {
 
 form.addEventListener("submit", handleRoomSubmit);
 
-socket.on("welcome", (nickName) => {
+socket.on("welcome", (nickName, newCount) => {
   addMessage(`${nickName}님이 입장하셨습니다.`);
+  userCount(newCount);
 });
 
-socket.on("bye", (nickName) => {
+socket.on("bye", (nickName, newCount) => {
   addMessage(`${nickName}님이 퇴장하셨습니다.`);
+  userCount(newCount);
 });
 
 socket.on("new_message", addMessage);

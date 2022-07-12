@@ -1,8 +1,8 @@
 import http from "http";
 // import WebSocket from "ws";
 import { Server } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 import express from "express";
-import { disconnect } from "process";
 
 const app = express();
 
@@ -18,7 +18,16 @@ const httpServer = http.createServer(app);
 // WebSocket 서버
 // const wss = new WebSocket.Server({ httpServer });
 // SoketIO 서버
-const wsServer = new Server(httpServer);
+const wsServer = new Server(httpServer, {
+  // admin-ui를 사용하는 환경
+  cors: {
+    origin: ["https://admin.socket.io"],
+    credentials: true,
+  },
+});
+instrument(wsServer, {
+  auth: false,
+});
 
 const publicRooms = () => {
   // const {
@@ -36,6 +45,10 @@ const publicRooms = () => {
   return publicRooms;
 };
 
+const countRoom = (roomName) => {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+};
+
 wsServer.on("connection", (socket) => {
   socket["nickName"] = "익명";
 
@@ -47,12 +60,12 @@ wsServer.on("connection", (socket) => {
     socket.join(roomName);
     socket["nickName"] = nickName;
     done();
-    socket.to(roomName).emit("welcome", socket.nickName);
+    socket.to(roomName).emit("welcome", socket.nickName, countRoom(roomName));
     wsServer.sockets.emit("room_change", publicRooms());
   });
 
   socket.on("disconnecting", () => {
-    socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickName));
+    socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickName, countRoom(room) - 1));
   });
 
   socket.on("disconnect", () => {
