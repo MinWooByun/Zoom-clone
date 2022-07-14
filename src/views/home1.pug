@@ -10,12 +10,19 @@ html(lang="en")
         header 
             h1 Noom
         main 
-            div#myStream
-                //- playinline은 모바일 브라우저가 필요로 하는 property이다. 이것으로 인해 전체화면으로 전환되지 않는다.
-                video#myFace(autoplay, playinline, width="400", height="400") 
-                button#mute Mute
-                button#camera Trun Camera Off
-                select#cameras 
+            div#welcome
+                form
+                    input#roomName(placeholder="room name", required, type="text")
+                    input#nickName(placeholder="nickName", required, type="text")
+                    button Enter
+                h4 Open Rooms:
+                ul
+            div#room
+                h3
+                ul
+                form
+                    input(placeholder="message", required, type="text")
+                    button Send
         //- 아래의 코드로 frontend에 socket.io를 설치함
         script(src="/socket.io/socket.io.js")     
         script(src="/public/js/app.js") 
